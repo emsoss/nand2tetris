@@ -1,3 +1,4 @@
+
 def rmv_comments(file):
     '''remove line starting by // and in code commenting'''
     fh=open(file,'r')
@@ -25,16 +26,17 @@ def StackArithmetic(vm_code):
     this function implement the arithmetic operation of a stack machine. it convert the VM Language to Jack assembly code
     '''
     asm=[]
-    for line vm_code lst:
-        if push in vm_code and constant in vm_code:
+    for line in vm_code:
+        if 'push' in line and 'constant' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
             asm.append('@SP')
             asm.append('A=M')
             asm.append('M='+str(line[-1]))
             asm.append('@SP')
             asm.append('M=M+1')
+            print 'pushed'
 
-        elif line== add:
+        elif line== 'add':
             #decrement the stack pointer and store its value in the D register.
             asm.append('@SP')
             asm.append('M=M-1')
@@ -50,6 +52,13 @@ def StackArithmetic(vm_code):
             asm.append('@SP')
             asm.append('A=M')
             asm.append('M=D')
+
+            #increment the stack pointer
+            asm.append('@SP')
+            asm.append('M=M+1')
+
     return asm
 
-print test1=StackArithmetic(test)
+test1=StackArithmetic(test)
+for i in test1:
+    print i
