@@ -57,7 +57,7 @@ def StackArithmetic(vm_code):
     for line in vm_code:
         if 'push' in line and 'constant' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@'+str(line[-1])+'\n')
+            asm.append('@'+line.split()[-1]+'\n')
             asm.append('D=A\n')
             asm.append('@SP\n')
             asm.append('A=M\n')
@@ -112,6 +112,30 @@ def StackArithmetic(vm_code):
             asm.append('@False\n')
             asm.append('D,JNE\n')
 
+        elif line=='lt':
+
+            #checking if the result=0 ?
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=D-M\n')
+            count+=8
+            skip=6
+            count+=skip
+            asm.append('@5\n')
+            asm.append('M='+str(count)+'\n')
+            #checking if result=0?
+            asm.append('@True\n')
+            #count+=12
+            asm.append('D;JLT\n')
+            asm.append('@False\n')
+            asm.append('D,JGE\n')
 
 
     for line in asm:
