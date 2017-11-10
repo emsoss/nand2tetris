@@ -350,13 +350,30 @@ def memory_acc(lst):
             asm.append('A=M')
             asm.append('M=D')
 
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
 
+        if 'pop' in line.split() and 'that' in line.split():
+            asm.append('@THAT')
+            asm.append('D=M')
+            asm.append('@'+line.split()[-1])
+            asm.append('D=D+A')
+            asm.append('@14')
+            #this the that address ready to be used
+            asm.append('M=D')
+            #now we can pop the value in the  right 'that' address
+            asm.append('@SP')
+            asm.append('M=M-1')
+            asm.append('A=M')
+            asm.append('D=M')
+            asm.append('@14')
+            asm.append('A=M')
+            asm.append('M=D')
+            
+            asm.append('')
+            asm.append('')
+            asm.append('')
+            asm.append('')
+            asm.append('')
+            asm.append('')
 
 
 
