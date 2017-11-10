@@ -316,7 +316,7 @@ def memory_acc(lst):
             asm.append('A=M')
             asm.append('M=D')
 
-        if 'pop' in line.split() and 'argument' in line.split():
+        elif 'pop' in line.split() and 'argument' in line.split():
             asm.append('@ARG')
             asm.append('D=M')
             asm.append('@'+line.split()[-1])
@@ -333,7 +333,7 @@ def memory_acc(lst):
             asm.append('A=M')
             asm.append('M=D')
 
-        if 'pop' in line.split() and 'this' in line.split():
+        elif 'pop' in line.split() and 'this' in line.split():
             asm.append('@THIS')
             asm.append('D=M')
             asm.append('@'+line.split()[-1])
@@ -351,7 +351,7 @@ def memory_acc(lst):
             asm.append('M=D')
 
 
-        if 'pop' in line.split() and 'that' in line.split():
+        elif 'pop' in line.split() and 'that' in line.split():
             asm.append('@THAT')
             asm.append('D=M')
             asm.append('@'+line.split()[-1])
@@ -368,7 +368,7 @@ def memory_acc(lst):
             asm.append('A=M')
             asm.append('M=D')
 
-        if 'pop' in line.split() and 'temp' in line.split():
+        elif 'pop' in line.split() and 'temp' in line.split():
             asm.append('@5') #temp= register 5, temp i= register (5+i)
             asm.append('D=A')
             asm.append('@'+line.split()[-1])
