@@ -431,6 +431,21 @@ def memory_acc(lst):
             asm.append('M=M+1\n')
             count+=12
 
+        elif 'push' in line and 'that' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@THAT')
+            asm.append('D=M')
+            asm.append('@'+line.split()[-1])
+            asm.append('D=D+A')
+            asm.append('A=D')
+            asm.append('D=M')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=12
+
             asm.append('')
             asm.append('')
             asm.append('')
