@@ -490,6 +490,20 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=11
 
+        elif 'push' in line and 'pointer' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@3\n')
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
 
     for line in asm:
         output_file.write(line)
