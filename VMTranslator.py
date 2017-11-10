@@ -307,7 +307,7 @@ def memory_acc(lst):
             asm.append('@14')
             #this the local address ready to be used
             asm.append('M=D')
-            #now we can pop the value in the local right local address
+            #now we can pop the value in the  right local address
             asm.append('@SP')
             asm.append('M=M-1')
             asm.append('A=M')
@@ -324,7 +324,24 @@ def memory_acc(lst):
             asm.append('@14')
             #this the argument address ready to be used
             asm.append('M=D')
-            #now we can pop the value in the local right argument address
+            #now we can pop the value in the  right argument address
+            asm.append('@SP')
+            asm.append('M=M-1')
+            asm.append('A=M')
+            asm.append('D=M')
+            asm.append('@14')
+            asm.append('A=M')
+            asm.append('M=D')
+
+        if 'pop' in line.split() and 'this' in line.split():
+            asm.append('@THIS')
+            asm.append('D=M')
+            asm.append('@'+line.split()[-1])
+            asm.append('D=D+A')
+            asm.append('@14')
+            #this the 'this' address ready to be used
+            asm.append('M=D')
+            #now we can pop the value in the  right 'this' address
             asm.append('@SP')
             asm.append('M=M-1')
             asm.append('A=M')
