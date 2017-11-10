@@ -367,7 +367,24 @@ def memory_acc(lst):
             asm.append('@14')
             asm.append('A=M')
             asm.append('M=D')
-            
+
+        if 'pop' in line.split() and 'temp' in line.split():
+            asm.append('@5') #temp= register 5, temp i= register (5+i)
+            asm.append('D=A')
+            asm.append('@'+line.split()[-1])
+            asm.append('D=D+A')
+            asm.append('@14')
+            #this the temp address ready to be used
+            asm.append('M=D')
+            #now we can pop the value in the  right temp address
+            asm.append('@SP')
+            asm.append('M=M-1')
+            asm.append('A=M')
+            asm.append('D=M')
+            asm.append('@14')
+            asm.append('A=M')
+            asm.append('M=D')
+
             asm.append('')
             asm.append('')
             asm.append('')
