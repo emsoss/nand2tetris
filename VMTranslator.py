@@ -26,6 +26,7 @@ for i in test:
 def StackArithmetic(vm_code):
     '''
     this function implement the arithmetic operation of a stack machine. it convert the VM Language to Jack assembly code
+    arithmetic operation= add, sub,eq, lt, gt, not, or, and, neg
     '''
     asm=[]
     count=0
@@ -292,6 +293,30 @@ def StackArithmetic(vm_code):
         output_file.write(line)
     output_file.close()
     return asm
+
+def memory_acc(lst):
+    ''' this function takes a list of VM command and convert it to assembly code by sending virtual addresses to their physical
+    location '''
+    asm=[]
+    for line in lst:
+        if 'pop' in line.split() and 'local' in line.split():
+            asm.append('@LCL')
+            asm.append('D=M')
+            asm.append('@'+line.split()[-1])
+            asm.append('D=D+A')
+            asm.append('@14')
+            #this the local address ready to be used
+            asm.append('M=D')
+            #now we can pop the value in the local right local address
+            asm.append('@SP')
+            asm.append('M=M-1')
+            asm.append('A=M')
+            asm.append('D=M')
+            asm.append('@14')
+            asm.append('A=M')
+            asm.append('M=D')
+
+
 
 
 
