@@ -1,5 +1,5 @@
-
-output_file=open('/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/StackArithmetic/StackTest/StackTest.asm', 'w')
+path='/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/MemoryAccess/BasicTest/BasicTest.asm'
+output_file=open(path, 'w')
 
 def rmv_comments(file):
     '''remove line starting by // and in code commenting'''
@@ -365,6 +365,24 @@ def StackArithmetic(vm_code):
 
         elif 'pop' in line.split() and 'temp' in line.split():
             asm.append('@5\n') #temp= register 5, temp i= register (5+i)
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the temp address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right temp address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+        elif 'pop' in line.split() and 'pointer' in line.split():
+            asm.append('@3\n') #temp= register 5, temp i= register (5+i)
             asm.append('D=A\n')
             asm.append('@'+line.split()[-1]+'\n')
             asm.append('D=D+A\n')
