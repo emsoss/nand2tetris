@@ -287,6 +287,190 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=9
 
+            ''' this function takes a list of VM command and convert it to assembly code by sending virtual addresses to their physical
+            location '''
+
+        elif 'pop' in line.split() and 'local' in line.split():
+            asm.append('@LCL\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the local address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right local address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+        elif 'pop' in line.split() and 'argument' in line.split():
+            asm.append('@ARG\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the argument address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right argument address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+        elif 'pop' in line.split() and 'this' in line.split():
+            asm.append('@THIS\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the 'this' address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right 'this' address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+
+        elif 'pop' in line.split() and 'that' in line.split():
+            asm.append('@THAT\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the that address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right 'that' address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+        elif 'pop' in line.split() and 'temp' in line.split():
+            asm.append('@5\n') #temp= register 5, temp i= register (5+i)
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the temp address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right temp address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
+
+
+        elif 'push' in line and 'argument' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@ARG\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'argument' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@ARG\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'local' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@LCL\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'that' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@THAT\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'this' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@THIS\n')
+            asm.append('D=M\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'temp' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@5\n')
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
 
 
     for line in asm:
@@ -294,195 +478,7 @@ def StackArithmetic(vm_code):
     output_file.close()
     return asm
 
-def memory_acc(lst):
-    ''' this function takes a list of VM command and convert it to assembly code by sending virtual addresses to their physical
-    location '''
-    asm=[]
-    for line in lst:
-        if 'pop' in line.split() and 'local' in line.split():
-            asm.append('@LCL')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('@14')
-            #this the local address ready to be used
-            asm.append('M=D')
-            #now we can pop the value in the  right local address
-            asm.append('@SP')
-            asm.append('M=M-1')
-            asm.append('A=M')
-            asm.append('D=M')
-            asm.append('@14')
-            asm.append('A=M')
-            asm.append('M=D')
-
-        elif 'pop' in line.split() and 'argument' in line.split():
-            asm.append('@ARG')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('@14')
-            #this the argument address ready to be used
-            asm.append('M=D')
-            #now we can pop the value in the  right argument address
-            asm.append('@SP')
-            asm.append('M=M-1')
-            asm.append('A=M')
-            asm.append('D=M')
-            asm.append('@14')
-            asm.append('A=M')
-            asm.append('M=D')
-
-        elif 'pop' in line.split() and 'this' in line.split():
-            asm.append('@THIS')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('@14')
-            #this the 'this' address ready to be used
-            asm.append('M=D')
-            #now we can pop the value in the  right 'this' address
-            asm.append('@SP')
-            asm.append('M=M-1')
-            asm.append('A=M')
-            asm.append('D=M')
-            asm.append('@14')
-            asm.append('A=M')
-            asm.append('M=D')
-
-
-        elif 'pop' in line.split() and 'that' in line.split():
-            asm.append('@THAT')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('@14')
-            #this the that address ready to be used
-            asm.append('M=D')
-            #now we can pop the value in the  right 'that' address
-            asm.append('@SP')
-            asm.append('M=M-1')
-            asm.append('A=M')
-            asm.append('D=M')
-            asm.append('@14')
-            asm.append('A=M')
-            asm.append('M=D')
-
-        elif 'pop' in line.split() and 'temp' in line.split():
-            asm.append('@5') #temp= register 5, temp i= register (5+i)
-            asm.append('D=A')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('@14')
-            #this the temp address ready to be used
-            asm.append('M=D')
-            #now we can pop the value in the  right temp address
-            asm.append('@SP')
-            asm.append('M=M-1')
-            asm.append('A=M')
-            asm.append('D=M')
-            asm.append('@14')
-            asm.append('A=M')
-            asm.append('M=D')
-
-
-        elif 'push' in line and 'argument' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@ARG')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-        elif 'push' in line and 'argument' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@ARG')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-        elif 'push' in line and 'local' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@LCL')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-        elif 'push' in line and 'that' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@THAT')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-        elif 'push' in line and 'this' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@THIS')
-            asm.append('D=M')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-        elif 'push' in line and 'temp' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@5')
-            asm.append('D=A')
-            asm.append('@'+line.split()[-1])
-            asm.append('D=D+A')
-            asm.append('A=D')
-            asm.append('D=M')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=12
-
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
-            asm.append('')
-
+#def memory_acc(lst):
 
 file_check=open('file2','w')
 test1=StackArithmetic(test)
