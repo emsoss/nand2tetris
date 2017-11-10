@@ -1,5 +1,5 @@
 
-output_file=open('/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/StackArithmetic/SimpleAdd/SimpleAdd.asm', 'w')
+output_file=open('/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/StackArithmetic/StackTest/StackTest.asm', 'w')
 
 def rmv_comments(file):
     '''remove line starting by // and in code commenting'''
@@ -30,29 +30,37 @@ def StackArithmetic(vm_code):
     asm=[]
     count=0
     if 'True' not in asm:
-        asm.append('@16\n')
+        asm.append('@22\n')
         asm.append('D=A\n')
-        asm.append('@5\n')
+        asm.append('@13\n')  #13 is save the next instruction to run
         asm.append('M=D\n')
+        asm.append('A=M\n')
+        asm.append('0;JMP\n')
 
         asm.append('(True)\n')
         asm.append('@SP\n')
         asm.append('A=M\n')
         asm.append('M=-1\n')
-        asm.append('@5\n')
+        #point sp to next available space and jump to the next instruction
+        asm.append('@SP\n')
+        asm.append('M=M+1\n')
+        asm.append('@13\n')
         asm.append('A=M\n')
         asm.append('0;JMP\n')
-        count+=9
+        count+=14
 
     if 'False' not in asm:
         asm.append('(False)\n')
         asm.append('@SP\n')
         asm.append('A=M\n')
         asm.append('M=0\n')
-        asm.append('@5\n')
+        #point sp to next available space and jump to the next instruction
+        asm.append('@SP\n')
+        asm.append('M=M+1\n')
+        asm.append('@13\n')
         asm.append('A=M\n')
         asm.append('0;JMP\n')
-        count+=6
+        count+=8
 
     for line in vm_code:
         if 'push' in line and 'constant' in line:
@@ -65,6 +73,104 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=7
+
+        elif line=='eq':
+
+            #checking if the result=0 ?
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=D-M\n')
+            asm.append('@14\n')   # saves the value of push substraction
+            asm.append('M=D\n')
+            count+=10
+            skip=10
+            count+=skip
+            asm.append('@'+str(count)+'\n')
+            asm.append('D=A\n')
+            asm.append('@13\n')
+            asm.append('M=D\n')
+            asm.append('@14\n')
+            asm.append('D=M\n')
+
+            #checking if result=0?
+            asm.append('@True\n')
+            #count+=12
+            asm.append('D;JEQ\n')
+            asm.append('@False\n')
+            asm.append('D;JNE\n')
+
+
+
+        elif line=='lt':
+
+            #checking if the result=0 ?
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=D-M\n')
+            asm.append('@14\n')
+            asm.append('M=D\n')
+            count+=10
+            skip=10
+            count+=skip
+            asm.append('@'+str(count)+'\n')
+            asm.append('D=A\n')
+            asm.append('@13\n')
+            asm.append('M=D\n')
+            asm.append('@14\n')
+            asm.append('D=M\n')
+            #checking if result=0?
+            asm.append('@True\n')
+            #count+=12
+            asm.append('D;JGT\n')
+            asm.append('@False\n')
+            asm.append('D,JLE\n')
+
+        elif line=='gt':
+
+            #checking if the result=0 ?
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=D-M\n')
+            asm.append('@14\n')
+            asm.append('M=D\n')
+            count+=10
+            skip=10
+            count+=skip
+            asm.append('@'+str(count)+'\n')
+            asm.append('D=A\n')
+            asm.append('@13\n')
+            asm.append('M=D\n')
+            asm.append('@14\n')
+            asm.append('D=M\n')
+            #checking if result=0?
+            asm.append('@True\n')
+            #count+=12
+            asm.append('D;JLT\n')
+            asm.append('@False\n')
+            asm.append('D,JGE\n')
+
+
         elif line== 'add':
             #decrement the stack pointer and store its value in the D register.
             asm.append('@SP\n')
@@ -87,9 +193,7 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=13
 
-        elif line=='eq':
-
-            #checking if the result=0 ?
+        elif line== 'sub':
             #decrement the stack pointer and store its value in the D register.
             asm.append('@SP\n')
             asm.append('M=M-1\n')
@@ -99,22 +203,30 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M-1\n')
             asm.append('A=M\n')
-            asm.append('D=D-M\n')
-            count+=8
-            skip=6
-            count+=skip
-            asm.append('@5\n')
-            asm.append('M='+str(count)+'\n')
-            #checking if result=0?
-            asm.append('@True\n')
-            #count+=12
-            asm.append('D;JEQ\n')
-            asm.append('@False\n')
-            asm.append('D,JNE\n')
+            asm.append('D=M-D\n')
 
-        elif line=='lt':
+            #store the addition value in the stack pointer Memory
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
 
-            #checking if the result=0 ?
+            #increment the stack pointer
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=13
+
+        elif line== 'neg':
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('M=-M\n')
+            #increment the stack pointer
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=6
+
+        elif line== 'and':
             #decrement the stack pointer and store its value in the D register.
             asm.append('@SP\n')
             asm.append('M=M-1\n')
@@ -124,18 +236,56 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M-1\n')
             asm.append('A=M\n')
-            asm.append('D=D-M\n')
-            count+=8
-            skip=6
-            count+=skip
-            asm.append('@5\n')
-            asm.append('M='+str(count)+'\n')
-            #checking if result=0?
-            asm.append('@True\n')
-            #count+=12
-            asm.append('D;JLT\n')
-            asm.append('@False\n')
-            asm.append('D,JGE\n')
+            asm.append('D=D&M\n')
+
+            #store the  value in the stack pointer Memory
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+
+            #increment the stack pointer
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=13
+
+        elif line== 'or':
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=D|M\n')
+
+            #store the  value in the stack pointer Memory
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+
+            #increment the stack pointer
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=13
+
+        elif line== 'not':
+            #decrement the stack pointer and store its value in the D register.
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=!M\n')
+            #decrement the stack pointer and complete the addition operation and store the value in the D register
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+
+            #increment the stack pointer
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=9
+
 
 
     for line in asm:
@@ -144,7 +294,14 @@ def StackArithmetic(vm_code):
     return asm
 
 
+
+file_check=open('file2','w')
 test1=StackArithmetic(test)
-print 'lenght', len(test1), test
+ex_lst=[]
 for i in test1:
-    print i
+    if '(' not in i:
+        ex_lst.append(i)
+count=0
+for e in ex_lst:
+    count+=1
+    file_check.write(str(count-1)+'   '+e)
