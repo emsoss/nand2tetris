@@ -1,4 +1,4 @@
-path='/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/MemoryAccess/BasicTest/BasicTest.asm'
+path='/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/MemoryAccess/PointerTest/PointerTest.asm'
 output_file=open(path, 'w')
 
 def rmv_comments(file):
@@ -382,14 +382,14 @@ def StackArithmetic(vm_code):
             count+=13
 
         elif 'pop' in line.split() and 'pointer' in line.split():
-            asm.append('@3\n') #temp= register 5, temp i= register (5+i)
+            asm.append('@3\n') #pointer= register 3, pointer i= register (3+i)
             asm.append('D=A\n')
             asm.append('@'+line.split()[-1]+'\n')
             asm.append('D=D+A\n')
             asm.append('@14\n')
             #this the temp address ready to be used
             asm.append('M=D\n')
-            #now we can pop the value in the  right temp address
+            #now we can pop the value in the  right pointer address
             asm.append('@SP\n')
             asm.append('M=M-1\n')
             asm.append('A=M\n')
@@ -399,6 +399,23 @@ def StackArithmetic(vm_code):
             asm.append('M=D\n')
             count+=13
 
+        elif 'pop' in line.split() and 'static' in line.split():
+            asm.append('@16\n') #pointer= register 3, pointer i= register (3+i)
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('@14\n')
+            #this the temp address ready to be used
+            asm.append('M=D\n')
+            #now we can pop the value in the  right pointer address
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n')
+            asm.append('@14\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            count+=13
 
         elif 'push' in line and 'argument' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -493,6 +510,21 @@ def StackArithmetic(vm_code):
         elif 'push' in line and 'pointer' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
             asm.append('@3\n')
+            asm.append('D=A\n')
+            asm.append('@'+line.split()[-1]+'\n')
+            asm.append('D=D+A\n')
+            asm.append('A=D\n')
+            asm.append('D=M\n')      #this the value contained in argument addr
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            count+=11
+
+        elif 'push' in line and 'static' in line:
+            #store the value of a constant in the stack pointer and increment the stack pointer
+            asm.append('@16\n')
             asm.append('D=A\n')
             asm.append('@'+line.split()[-1]+'\n')
             asm.append('D=D+A\n')
