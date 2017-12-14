@@ -562,9 +562,10 @@ def StackArithmetic(vm_code):
             asm.append('('+label_name+')\n')
 
         elif 'if-goto' in line:
-            label_name= '('+line.split(' ')[1:][0]+')'
+            label_name= line.split(' ')[1:][0]
             asm.append('@SP\n')
-            asm.append('A=M-1\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')            
             asm.append('D=M\n')
             asm.append('@'+label_name+'\n')
             asm.append('D;JGT\n')
