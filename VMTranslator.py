@@ -1,8 +1,8 @@
-path='/home/emmanuel/Desktop/from-nand2tetris/nand2tetris/projects/07/MemoryAccess/PointerTest/PointerTest.asm'
+path='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/output_file'
 output_file=open(path, 'w')
 
 def rmv_comments(file):
-    '''remove line starting by // and in code commenting'''
+    '''remove line starting by // and in code commenting and removes spaces'''
     fh=open(file,'r')
     txt=fh.read()
     new_list=[]
@@ -19,9 +19,6 @@ def rmv_comments(file):
                 new_list.append(candidate.strip())
     return new_list
 
-test=rmv_comments('simpleadd.asm')
-for i in test:
-    print i
 
 def StackArithmetic(vm_code):
     '''
@@ -30,6 +27,9 @@ def StackArithmetic(vm_code):
     '''
     asm=[]
     count=0
+    #the True and False label are placed at the top in assembly code. initial point where the
+    #execution should start is line 22 so we save 22 in RAM 13 which is a general purpose memory aand
+    #we jump to it. that is what the below code is doing.
     if 'True' not in asm:
         asm.append('@22\n')
         asm.append('D=A\n')
@@ -37,6 +37,12 @@ def StackArithmetic(vm_code):
         asm.append('M=D\n')
         asm.append('A=M\n')
         asm.append('0;JMP\n')
+
+    #the below code initializes the True segment of the assembly code for ex
+    #if we push 3 and push 4 and want to run the code gt. if the result is true the the execution jumps to this segment
+    #which starts on line 6 in assembly code. from here -1 which means True is written to memory of the current Stack
+    #and we jump to the address saved in RAM 13 which was saved before jumping here.
+
 
         asm.append('(True)\n')
         asm.append('@SP\n')
@@ -49,6 +55,10 @@ def StackArithmetic(vm_code):
         asm.append('A=M\n')
         asm.append('0;JMP\n')
         count+=14
+
+    #the below if statement initializes the False segment of the assembly code for ex
+    #if we push 3 and push 4 and want to run the code gt. the code will jump to this segment
+    #which starts at on line 15 in assembly code
 
     if 'False' not in asm:
         asm.append('(False)\n')
@@ -64,6 +74,7 @@ def StackArithmetic(vm_code):
         count+=8
 
     for line in vm_code:
+        #push constant value implementation
         if 'push' in line and 'constant' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
             asm.append('@'+line.split()[-1]+'\n')
@@ -92,7 +103,7 @@ def StackArithmetic(vm_code):
             asm.append('M=D\n')
             count+=10
             skip=10
-            count+=skip
+            count+=skip  #this is the address that should be jump to from True/False label segment
             asm.append('@'+str(count)+'\n')
             asm.append('D=A\n')
             asm.append('@13\n')
@@ -102,7 +113,9 @@ def StackArithmetic(vm_code):
 
             #checking if result=0?
             asm.append('@True\n')
-            #count+=12
+
+            #from here we go to the False label or True label. depending on the value of D. from the label
+            #we jump to the address saved in RAM 14.
             asm.append('D;JEQ\n')
             asm.append('@False\n')
             asm.append('D;JNE\n')
@@ -287,15 +300,22 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=9
 
+
+
             ''' this function takes a list of VM command and convert it to assembly code by sending virtual addresses to their physical
             location '''
 
         elif 'pop' in line.split() and 'local' in line.split():
+            #implementation for ex pop local 5. removes the last value pushed on the stack to the memory located at local 5.
+            #LCL is a pointer for the base of the local segment. so local 5 is LCL+5. so to effect a pop local value operation
+            #we select the LCL point and add the value of the pop command to the content of LCL. next save the resultant value
+            #to RAM 14 which is a general purpose memory. next we remove the value from stack(sp) to the addr that RAM 14
+            #points to.
             asm.append('@LCL\n')
             asm.append('D=M\n')
             asm.append('@'+line.split()[-1]+'\n')
             asm.append('D=D+A\n')
-            asm.append('@14\n')
+            asm.append('@14\n')  #save the addr of local 5 in the general purpose RAM 14
             #this the local address ready to be used
             asm.append('M=D\n')
             #now we can pop the value in the  right local address
@@ -537,6 +557,19 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=11
 
+        elif 'label' in line :
+            label_name= line.split(' ')[1:][0]
+            asm.append('('+label_name+')\n')
+
+        elif 'if-goto' in line:
+            label_name= '('+line.split(' ')[1:][0]+')'
+            asm.append('@SP\n')
+            asm.append('A=M-1\n')
+            asm.append('D=M\n')
+            asm.append('@'+label_name+'\n')
+            asm.append('D;JGT\n')
+
+
     for line in asm:
         output_file.write(line)
     output_file.close()
@@ -544,12 +577,16 @@ def StackArithmetic(vm_code):
 
 #def memory_acc(lst):
 
+test=rmv_comments('simpleadd.asm')
+for i in test:
+    print i
+
 file_check=open('file2','w')
 test1=StackArithmetic(test)
 ex_lst=[]
 for i in test1:
-    if '(' not in i:
-        ex_lst.append(i)
+    #if '(' not in i:
+    ex_lst.append(i)
 count=0
 for e in ex_lst:
     count+=1
