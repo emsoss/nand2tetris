@@ -1,5 +1,9 @@
+import os
+
 path='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/output_file'
 output_file=open(path, 'w')
+input_file=open(path, 'w')
+
 
 def rmv_comments(file):
     '''remove line starting by // and in code commenting and removes spaces'''
@@ -22,7 +26,7 @@ def rmv_comments(file):
 
 def StackArithmetic(vm_code):
     '''
-    this function implement the arithmetic operation of a stack machine. it convert the VM Language to Jack assembly code
+     function implement the arithmetic operation of a stack machine. it convert the VM Language to Jack assembly code
     arithmetic operation= add, sub,eq, lt, gt, not, or, and, neg
     '''
     asm=[]
@@ -401,6 +405,8 @@ def StackArithmetic(vm_code):
             asm.append('M=D\n')
             count+=13
 
+        #the below condition implement for ex: pop pointer 1. pointer 0 refers to THIS
+        #and point That refers to That
         elif 'pop' in line.split() and 'pointer' in line.split():
             asm.append('@3\n') #pointer= register 3, pointer i= register (3+i)
             asm.append('D=A\n')
@@ -557,18 +563,86 @@ def StackArithmetic(vm_code):
             asm.append('M=M+1\n')
             count+=11
 
+        #the next elif implement label insertion and if-go command.
         elif 'label' in line :
             label_name= line.split(' ')[1:][0]
             asm.append('('+label_name+')\n')
 
         elif 'if-goto' in line:
             label_name= line.split(' ')[1:][0]
+
             asm.append('@SP\n')
             asm.append('M=M-1\n')
-            asm.append('A=M\n')            
+            asm.append('A=M\n')
             asm.append('D=M\n')
             asm.append('@'+label_name+'\n')
             asm.append('D;JGT\n')
+
+        #unconditional jump implementation. ex: goto End_program
+        elif line.startswith('goto'):
+            label_name=line[5:]
+            asm.append('@'+label_name+'\n')
+            asm.append('0;JMP\n')
+
+        elif line=='return':
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')
+            asm.append('D=M\n') # stores value to be returned in D register
+            asm.append('@ARG\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n') #stores the returned value in addr pointed by arg
+
+            asm.append('@ARG\n')
+            asm.append('D=M\n')
+            asm.append('@13\n')
+            asm.append('M=D+1\n') #store arg0 pointer +1 in register 13 which is a general purpose register
+
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')  #selects the saved That
+            asm.append('D=M\n')
+            asm.append('@THAT\n') #THAT=register 4
+            asm.append('M=D\n')
+
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')  #selects the saved This
+            asm.append('D=M\n')
+            asm.append('@THIS\n')  #THIS =register 3
+            asm.append('M=D\n')
+
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')  #selects the saved ARG
+            asm.append('D=M\n')
+            asm.append('@ARG\n')
+            asm.append('M=D\n')
+
+
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')  #selects the saved LCL
+            asm.append('D=M\n')
+            asm.append('@LCL\n')
+            asm.append('M=D\n')
+
+            asm.append('@SP\n')
+            asm.append('M=M-1\n')
+            asm.append('A=M\n')  #selects the saved address
+            asm.append('D=M\n')
+            asm.append('@14\n') # store the return address in register 14
+            asm.append('M=D\n')
+
+            asm.append('@13\n')
+            asm.append('D=M\n') #this is where the stack point should be after the func returns
+            asm.append('@SP\n')
+            asm.append('M=D\n') #
+
+            asm.append('@14\n')
+            asm.append('A=M\n')  #select the return address and jump to it
+            asm.append('0;JMP\n')
+
 
 
     for line in asm:
