@@ -1,8 +1,27 @@
 import os
 
 path='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/output_file'
+path1='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/input_file'
+
 output_file=open(path, 'w')
-input_file=open(path, 'w')
+os.remove('input_file') # removes input_file if it exist and recreate it. in the next line.
+input_file=open(path1, 'w')
+
+def combine_vmfile(directory):
+    files=os.listdir(directory)
+
+    print 'files', files
+    for file in files:
+        if file.startswith('Sys'):
+            fh=open(file,'r')
+            txt=fh.read()
+            input_file.write(txt)
+
+    for file in files:
+        if file.endswith('.vm') and file!='Sys.vm':
+            fh=open(file,'r')
+            txt=fh.read()
+            input_file.write(txt)
 
 
 def rmv_comments(file):
@@ -650,8 +669,9 @@ def StackArithmetic(vm_code):
     output_file.close()
     return asm
 
+#combine all .vm file in a given directory.
+combine_vmfile('/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris')
 #def memory_acc(lst):
-
 test=rmv_comments('simpleadd.asm')
 for i in test:
     print i
