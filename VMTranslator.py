@@ -1,27 +1,36 @@
 import os
 
+vm_files=0
 path='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/output_file'
-path1='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/input_file'
+path1='/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris/combined_file'
 
 output_file=open(path, 'w')
-os.remove('input_file') # removes input_file if it exist and recreate it. in the next line.
-input_file=open(path1, 'w')
+os.remove('combined_file') # removes combined_file if it exist and recreate it. in the next line.
+combined_file=open(path1, 'w')
+
+
 
 def combine_vmfile(directory):
+
+    global vm_files
     files=os.listdir(directory)
+
 
     print 'files', files
     for file in files:
-        if file.startswith('Sys'):
+        if file.startswith('Sys.vm'):
+            vm_files+=1
             fh=open(file,'r')
             txt=fh.read()
-            input_file.write(txt)
+            combined_file.write(txt)
 
     for file in files:
         if file.endswith('.vm') and file!='Sys.vm':
+            vm_files+=1
             fh=open(file,'r')
             txt=fh.read()
-            input_file.write(txt)
+            combined_file.write(txt)
+    combined_file.close()
 
 
 def rmv_comments(file):
@@ -50,6 +59,8 @@ def StackArithmetic(vm_code):
     '''
     asm=[]
     count=0
+    addr=0 # this is the next command to be run.
+    step=0 # count num of lines
     #the True and False label are placed at the top in assembly code. initial point where the
     #execution should start is line 22 so we save 22 in RAM 13 which is a general purpose memory aand
     #we jump to it. that is what the below code is doing.
@@ -78,6 +89,8 @@ def StackArithmetic(vm_code):
         asm.append('A=M\n')
         asm.append('0;JMP\n')
         count+=14
+        addr+=14
+        step+=14
 
     #the below if statement initializes the False segment of the assembly code for ex
     #if we push 3 and push 4 and want to run the code gt. the code will jump to this segment
@@ -95,8 +108,20 @@ def StackArithmetic(vm_code):
         asm.append('A=M\n')
         asm.append('0;JMP\n')
         count+=8
+        addr+=8
+        step+=8
 
+    bootstrap=['@256','D=A','@SP','M=D','call Sys.init 0']
+    if vm_files>1:
+        vm_code=bootstrap+vm_code
     for line in vm_code:
+        addr+=1
+        #this is the bootstrap code @sp that was added to initialize sp to 256
+        if line.startswith('@') or line.startswith('D') or line.startswith('M'):
+            asm.append(line+'\n')
+            count+=1
+            step+=1
+
         #push constant value implementation
         if 'push' in line and 'constant' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -108,6 +133,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=7
+            step+=7
 
         elif line=='eq':
 
@@ -126,6 +152,7 @@ def StackArithmetic(vm_code):
             asm.append('M=D\n')
             count+=10
             skip=10
+            step+=10
             count+=skip  #this is the address that should be jump to from True/False label segment
             asm.append('@'+str(count)+'\n')
             asm.append('D=A\n')
@@ -142,6 +169,8 @@ def StackArithmetic(vm_code):
             asm.append('D;JEQ\n')
             asm.append('@False\n')
             asm.append('D;JNE\n')
+            count+=9
+            step+=10
 
 
 
@@ -157,12 +186,14 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M-1\n')
             asm.append('A=M\n')
-            asm.append('D=D-M\n')
+            asm.append('D=M-D\n') #changed D-M to M-D
             asm.append('@14\n')
             asm.append('M=D\n')
             count+=10
             skip=10
             count+=skip
+            step+=10
+
             asm.append('@'+str(count)+'\n')
             asm.append('D=A\n')
             asm.append('@13\n')
@@ -172,9 +203,11 @@ def StackArithmetic(vm_code):
             #checking if result=0?
             asm.append('@True\n')
             #count+=12
-            asm.append('D;JGT\n')
+            asm.append('D;JLT\n') #changed JGT to JLT
             asm.append('@False\n')
-            asm.append('D,JLE\n')
+            asm.append('D,JGE\n') #changed JLE to JGE
+            count+=9
+            step+=10
 
         elif line=='gt':
 
@@ -194,6 +227,8 @@ def StackArithmetic(vm_code):
             count+=10
             skip=10
             count+=skip
+            step+=10
+
             asm.append('@'+str(count)+'\n')
             asm.append('D=A\n')
             asm.append('@13\n')
@@ -206,7 +241,8 @@ def StackArithmetic(vm_code):
             asm.append('D;JLT\n')
             asm.append('@False\n')
             asm.append('D,JGE\n')
-
+            count+=9
+            step+=10
 
         elif line== 'add':
             #decrement the stack pointer and store its value in the D register.
@@ -229,6 +265,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=13
+            step+=13
 
         elif line== 'sub':
             #decrement the stack pointer and store its value in the D register.
@@ -251,6 +288,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=13
+            step+=13
 
         elif line== 'neg':
             #decrement the stack pointer and store its value in the D register.
@@ -262,6 +300,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=6
+            step+=6
 
         elif line== 'and':
             #decrement the stack pointer and store its value in the D register.
@@ -284,6 +323,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=13
+            step+=13
 
         elif line== 'or':
             #decrement the stack pointer and store its value in the D register.
@@ -306,6 +346,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=13
+            step+=13
 
         elif line== 'not':
             #decrement the stack pointer and store its value in the D register.
@@ -322,6 +363,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=9
+            step+=9
 
 
 
@@ -350,6 +392,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         elif 'pop' in line.split() and 'argument' in line.split():
             asm.append('@ARG\n')
@@ -368,6 +411,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         elif 'pop' in line.split() and 'this' in line.split():
             asm.append('@THIS\n')
@@ -386,6 +430,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
 
         elif 'pop' in line.split() and 'that' in line.split():
@@ -405,6 +450,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         elif 'pop' in line.split() and 'temp' in line.split():
             asm.append('@5\n') #temp= register 5, temp i= register (5+i)
@@ -423,6 +469,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         #the below condition implement for ex: pop pointer 1. pointer 0 refers to THIS
         #and point That refers to That
@@ -443,6 +490,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         elif 'pop' in line.split() and 'static' in line.split():
             asm.append('@16\n') #pointer= register 3, pointer i= register (3+i)
@@ -461,6 +509,7 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('M=D\n')
             count+=13
+            step+=13
 
         elif 'push' in line and 'argument' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -476,21 +525,9 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
-        elif 'push' in line and 'argument' in line:
-            #store the value of a constant in the stack pointer and increment the stack pointer
-            asm.append('@ARG\n')
-            asm.append('D=M\n')
-            asm.append('@'+line.split()[-1]+'\n')
-            asm.append('D=D+A\n')
-            asm.append('A=D\n')
-            asm.append('D=M\n')      #this the value contained in argument addr
-            asm.append('@SP\n')
-            asm.append('A=M\n')
-            asm.append('M=D\n')
-            asm.append('@SP\n')
-            asm.append('M=M+1\n')
-            count+=11
+
 
         elif 'push' in line and 'local' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -506,6 +543,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         elif 'push' in line and 'that' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -521,6 +559,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         elif 'push' in line and 'this' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -536,6 +575,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         elif 'push' in line and 'temp' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -551,6 +591,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         elif 'push' in line and 'pointer' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -566,6 +607,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         elif 'push' in line and 'static' in line:
             #store the value of a constant in the stack pointer and increment the stack pointer
@@ -581,6 +623,7 @@ def StackArithmetic(vm_code):
             asm.append('@SP\n')
             asm.append('M=M+1\n')
             count+=11
+            step+=11
 
         #the next elif implement label insertion and if-go command.
         elif 'label' in line :
@@ -595,13 +638,17 @@ def StackArithmetic(vm_code):
             asm.append('A=M\n')
             asm.append('D=M\n')
             asm.append('@'+label_name+'\n')
-            asm.append('D;JGT\n')
+            asm.append('D;JNE\n')
+            count+=6
+            step+=6
 
         #unconditional jump implementation. ex: goto End_program
         elif line.startswith('goto'):
             label_name=line[5:]
             asm.append('@'+label_name+'\n')
             asm.append('0;JMP\n')
+            count+=2
+            step+=2
 
         elif line=='return':
             asm.append('@SP\n')
@@ -615,7 +662,7 @@ def StackArithmetic(vm_code):
             asm.append('@ARG\n')
             asm.append('D=M\n')
             asm.append('@13\n')
-            asm.append('M=D+1\n') #store arg0 pointer +1 in register 13 which is a general purpose register
+            asm.append('M=D+1\n') #store arg0 pointer +1 in register 13 which is a general purpose register. this is the sp
 
             asm.append('@SP\n')
             asm.append('M=M-1\n')
@@ -661,21 +708,115 @@ def StackArithmetic(vm_code):
             asm.append('@14\n')
             asm.append('A=M\n')  #select the return address and jump to it
             asm.append('0;JMP\n')
+            count+=48
+            step+=48
 
 
+        elif line.startswith('function'):
+            asm.append('('+ line.split()[1]+')\n')
 
+        elif line.startswith('call'):
+            nargs=int(line.split()[-1]+'\n')
+            asm.append('@SP\n')
+            asm.append('D=M\n')
+            asm.append('@13\n') #save stack point addr in register 13
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            count+=5
+            step+=5
+
+            for num in range(nargs):
+                count+=1
+                step+=1
+                asm.append('M=M-1\n') #go up on sp until arg0
+            asm.append('A=M\n') #store arg0 in D
+            asm.append('D=A\n') #changed D=M to D=A for debugging
+            asm.append('@14\n') # save *arg0 in register 14
+            asm.append('M=D\n')
+            asm.append('@13\n')
+            asm.append('D=M\n')
+            asm.append('@SP\n')
+            asm.append('M=D\n') #return SP to where it was before func call
+            count+=8
+            step+=8
+            step_to_next_address=44
+            #save the addr to go to after func returns
+            asm.append('@'+str(step+step_to_next_address)+'\n')
+            print 'address', step+step_to_next_address+1
+            asm.append('D=A\n') #this is the address to be saved.
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            #save the caller LCL
+            asm.append('@LCL\n')
+            asm.append('D=M\n') #store caller LCL in D register
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+
+            #save the caller ARG
+            asm.append('@ARG\n')
+            asm.append('D=M\n') #store caller ARG in D register
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            #set up ARG for the called function
+            asm.append('@14\n') # arg0 of the called func is saved in register 14
+            asm.append('D=M\n')
+            asm.append('@ARG\n')
+            asm.append('M=D\n')
+            #save the caller THIS
+            asm.append('@THIS\n')
+            asm.append('D=M\n') #store caller THIS in D register
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+
+            #save the caller THAT
+            asm.append('@THAT\n')
+            asm.append('D=M\n') #store caller THAT in D register
+            asm.append('@SP\n')
+            asm.append('A=M\n')
+            asm.append('M=D\n')
+            asm.append('@SP\n')
+            asm.append('M=M+1\n')
+            asm.append('D=M\n')
+            asm.append('@LCL\n') #this is the base of the LCL
+            asm.append('M=D\n')
+            #go execute the func
+            asm.append('@'+ line.split()[1]+'\n')
+            asm.append('0;JMP\n')
+            count+=44
+            step+=44
+    print 'count', step
     for line in asm:
         output_file.write(line)
     output_file.close()
     return asm
 
-#combine all .vm file in a given directory.
+file_check=open('file2','w')
+#combine all .vm file in a given directory. and saves it in an combined_file
 combine_vmfile('/home/emmanuel/Desktop/programming_project/from-nand2tetris/git-nand2tetris')
 #def memory_acc(lst):
-test=rmv_comments('simpleadd.asm')
-for i in test:
-    print i
-
+vmcode_lst=rmv_comments('combined_file')
+for line in vmcode_lst:
+    file_check.write(line+'\n')
+asm_code=StackArithmetic(vmcode_lst)
+print 'asm', asm_code
+dec=0
+for i in asm_code:
+    if i.startswith('('):
+        dec+=1
+print 'total', len(asm_code)-dec
+'''
 file_check=open('file2','w')
 test1=StackArithmetic(test)
 ex_lst=[]
@@ -686,3 +827,4 @@ count=0
 for e in ex_lst:
     count+=1
     file_check.write(str(count-1)+'   '+e)
+    '''
